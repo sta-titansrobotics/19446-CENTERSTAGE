@@ -67,6 +67,9 @@ public class DriveControlled446 extends LinearOpMode {
         linkageLeftPos = 0.0;
         LinkageRightPos = 0.0;
 
+        //Boolean variables
+        boolean intakeOn = False;
+
         waitForStart();
 
         if (isStopRequested())
@@ -98,6 +101,27 @@ public class DriveControlled446 extends LinearOpMode {
             motorBL.setPower(backLeftPower);
             motorBR.setPower(backRightPower);
             // endregion
+
+            //Intake Motor Code
+            if ((gamepad2.right_trigger > 0.0) && !intakeOn){
+                intakeMotor.setPower(1);
+            }else if((gamepad2.right_trigger == 0.0) && !intakeOn){
+                intakeMotor.setPower(0);
+            }
+
+            if ((gamepad2.left_trigger > 0.0) && !intakeOn){
+                intakeMotor.setPower(-1);
+            }else if((gamepad2.left_trigger == 0.0) && !intakeOn){
+                intakeMotor.setPower(0);
+            }
+
+            if(gamepad2.a && !intakeOn){
+                intakeMotor.setPower(1);
+                intakeOn = True;
+            }else if(gamepad2.a && intakeOn){
+                intakeMotor.setPower(0);
+                intakeOn = False;
+            }
             
             // region intake
             // This is just a test. Will change in the future
