@@ -10,12 +10,19 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
 public class DriveControlled446 extends LinearOpMode {
 
-    // region variables
+    //Primary Motor Defintions
     private DcMotor motorFL;
     private DcMotor motorFR;
     private DcMotor motorBL;
     private DcMotor motorBR;
+
+    //Secondary Motor Definitions
     private DcMotor intakeMotor;
+    private DcMotor sliderMotor;
+    private DcMotor liftLeft;
+    private DcMotor liftRight;
+
+    //Servo Definitions
     private Servo frontIntake1;
     private Servo frontIntake2;
     private Servo outtake;
@@ -25,12 +32,17 @@ public class DriveControlled446 extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        //region Dc Motors
+        //Drivetrain DC motors
         motorFL = hardwareMap.get(DcMotor.class, "motorFrontLeft");
         motorBL = hardwareMap.get(DcMotor.class, "motorBackLeft");
         motorFR = hardwareMap.get(DcMotor.class, "motorFrontRight");
         motorBR = hardwareMap.get(DcMotor.class, "motorBackRight");
+
+        //Secondary system DC motors
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
+        sliderMotor = hardwareMap.get(DcMotor.class, "sliderMotor");
+        liftLeft = hardwareMap.get(DcMotor.class, "liftLeft");
+        liftRight = hardwareMap.get(DcMotor.class, "liftRight");
 
         //Reverse left side motors
         motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -43,6 +55,17 @@ public class DriveControlled446 extends LinearOpMode {
         outtake = hardwareMap.get(Servo.class, "outtake");
         flipper = hardwareMap.get(Servo.class, "flipper");
         // endregion
+
+        //telemetry definition
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        //Intake Linkage Servo
+        double linkageLeftPos;
+        double linkageRightPos;
+
+        //Initial Positions
+        linkageLeftPos = 0.0;
+        LinkageRightPos = 0.0;
 
         waitForStart();
 
@@ -102,7 +125,7 @@ public class DriveControlled446 extends LinearOpMode {
             }
             // endregion
 
-            // region Telemetry
+            // Drivetrain Telemetry
             telemetry.addData("LF Power:", motorFL.getPower());
             telemetry.addData("LB Power:", motorBL.getPower());
             telemetry.addData("RF Power:", motorFR.getPower());
@@ -111,10 +134,26 @@ public class DriveControlled446 extends LinearOpMode {
             telemetry.addData("LB Position:", motorBL.getCurrentPosition());
             telemetry.addData("RF Position:", motorFR.getCurrentPosition());
             telemetry.addData("RB Position:", motorBR.getCurrentPosition());
+
+            //Intake Motor telemetry
             telemetry.addData("Intake Motor Power: ", intakeMotor.getPower());
             telemetry.addData("Intake Motor Position: ", intakeMotor.getCurrentPosition());
-            telemetry.addData("FrontIntake1 Position: ", frontIntake1.getCurrentPosition());
-            telemetry.addData("FrontIntake2 Position: ", frontIntake2.getCurrentPosition());
+
+            //Slider telemetry
+            telemetry.addData("Slider Power: ", sliderMotor.getPower());
+            telemetry.addData("Slider Position: ", sliderMotor.getCurrentPosition());
+
+            //Lift telemetry
+            telemetry.addData("Lift Left Power:", liftLeft.getPower());
+            telemetry.addData("Lift Right Power:", liftRight.getPower());
+            telemetry.addData("Lift Left Position:", liftLeft.getCurrentPosition());
+            telemetry.addData("Lift Right Position:", liftRight.getCurrentPosition());
+
+            //Intake Servo telemetry
+            telemetry.addData("Intake Left Position: ", frontIntake1.getCurrentPosition());
+            telemetry.addData("Intake Right Position: ", frontIntake2.getCurrentPosition());
+
+            //Outtake telemetry
             telemetry.addData("Outtake Position: ", outtake.getCurrentPosition());
             telemetry.addData("Flipper position: ", flipper.getCurrentPosition());
             telemetry.update();
