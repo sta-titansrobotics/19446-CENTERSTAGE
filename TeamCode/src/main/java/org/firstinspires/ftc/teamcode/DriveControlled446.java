@@ -145,35 +145,49 @@ public class DriveControlled446 extends LinearOpMode {
                 liftLeft.setPower(1);
                 liftRight.setPower(1);
             }
-
-            /*
-            // region intake
-            // This is just a test. Will change in the future
-            if (gamepad1.a) {
-                intakeMotor.setPower(1);
-                outtake.setPosition(1);
+            
+            // If you press the left trigger then the intake motor direction is reversed
+            boolean intakeDirectionForwards = true;
+            if (gamepad1.left_trigger == 1) {
+                if (intakeDirectionForwards) {
+                    intakeMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+                    intakeDirectionForwards = false;
+                } else {
+                    intakeMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+                    intakeDirectionForwards = true;
+                }
             }
-            if (gamepad2.b) {
+            
+            // Pressing the left trigger will also spin the intake
+            double intakePower = gamepad1.right_trigger;
+            intakeMotor.setPower(intakePower);
+
+            // Intake servos
+            if (gamepad2.dpad_up) {
                 frontIntake1.setPosition(1);
                 frontIntake2.setPosition(1);
             }
-            if (gamepad2.x) {
+            if (gamepad2.dpad_down) {
                 frontIntake1.setPosition(0);
                 frontIntake2.setPosition(0);
                 outtake.setPosition(0);
             }
+            frontIntake1.setPosition(gamepad2.left_stick_y);
+            frontIntake2.setPosition(gamepad2.left_stick_y);
+
+            // Flipper
             boolean isFlipperOpen = false;
             if (gamepad2.y) {
                 if (!isFlipperOpen) {
                     flipper.setPosition(1);
+                    isFlipperOpen = true;
                 }
                 else {
                     flipper.setPosition(0);
+                    isFlipperOpen = false;
                 }
             }
-            // endregion
-            */
-
+            
             // Drivetrain Telemetry
             telemetry.addData("LF Power:", motorFL.getPower());
             telemetry.addData("LB Power:", motorBL.getPower());
