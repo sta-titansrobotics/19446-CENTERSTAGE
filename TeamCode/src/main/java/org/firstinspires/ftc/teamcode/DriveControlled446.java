@@ -4,8 +4,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 @TeleOp
 public class DriveControlled446 extends LinearOpMode {
@@ -54,8 +55,8 @@ public class DriveControlled446 extends LinearOpMode {
         liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         sliderMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         sliderMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -68,19 +69,16 @@ public class DriveControlled446 extends LinearOpMode {
         flipper = hardwareMap.get(Servo.class, "flipper");
         // endregion
 
-        //telemetry definition
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-
         //Intake Linkage Servo
         double linkageLeftPos;
         double linkageRightPos;
 
         //Initial Positions
         linkageLeftPos = 0.0;
-        LinkageRightPos = 0.0;
+        linkageRightPos = 0.0;
 
         //Boolean variables
-        boolean intakeOn = False;
+        boolean intakeOn = false;
 
         waitForStart();
 
@@ -129,12 +127,26 @@ public class DriveControlled446 extends LinearOpMode {
 
             if(gamepad2.a && !intakeOn){
                 intakeMotor.setPower(1);
-                intakeOn = True;
+                intakeOn = true;
             }else if(gamepad2.a && intakeOn){
                 intakeMotor.setPower(0);
-                intakeOn = False;
+                intakeOn = false;
             }
-            
+
+            //Encoder Values for the lift
+            if(gamepad2.dpad_up){
+                liftLeft.setTargetPosition(35000);
+                rightLift.setTargetPosition(35000);
+                liftLeft.setPower(1);
+                liftRight.setPower(1);
+            }else if(gamepad2.dpad_down){
+                liftLeft.setTargetPosition(0);
+                rightLift.setTargetPosition(0);
+                liftLeft.setPower(1);
+                liftRight.setPower(1);
+            }
+
+            /*
             // region intake
             // This is just a test. Will change in the future
             if (gamepad1.a) {
@@ -160,20 +172,16 @@ public class DriveControlled446 extends LinearOpMode {
                 }
             }
             // endregion
+            */
 
             // Drivetrain Telemetry
             telemetry.addData("LF Power:", motorFL.getPower());
             telemetry.addData("LB Power:", motorBL.getPower());
             telemetry.addData("RF Power:", motorFR.getPower());
             telemetry.addData("RB Power:", motorBR.getPower());
-            telemetry.addData("LF Position:", motorFL.getCurrentPosition());
-            telemetry.addData("LB Position:", motorBL.getCurrentPosition());
-            telemetry.addData("RF Position:", motorFR.getCurrentPosition());
-            telemetry.addData("RB Position:", motorBR.getCurrentPosition());
 
             //Intake Motor telemetry
             telemetry.addData("Intake Motor Power: ", intakeMotor.getPower());
-            telemetry.addData("Intake Motor Position: ", intakeMotor.getCurrentPosition());
 
             //Slider telemetry
             telemetry.addData("Slider Power: ", sliderMotor.getPower());
@@ -186,12 +194,12 @@ public class DriveControlled446 extends LinearOpMode {
             telemetry.addData("Lift Right Position:", liftRight.getCurrentPosition());
 
             //Intake Servo telemetry
-            telemetry.addData("Intake Left Position: ", frontIntake1.getCurrentPosition());
-            telemetry.addData("Intake Right Position: ", frontIntake2.getCurrentPosition());
+            //telemetry.addData("Intake Left Position: ", frontIntake1.getCurrentPosition());
+            //telemetry.addData("Intake Right Position: ", frontIntake2.getCurrentPosition());
 
             //Outtake telemetry
-            telemetry.addData("Outtake Position: ", outtake.getCurrentPosition());
-            telemetry.addData("Flipper position: ", flipper.getCurrentPosition());
+            //telemetry.addData("Outtake Position: ", outtake.getCurrentPosition());
+            //telemetry.addData("Flipper position: ", flipper.getCurrentPosition());
             telemetry.update();
             //endregion
         }
