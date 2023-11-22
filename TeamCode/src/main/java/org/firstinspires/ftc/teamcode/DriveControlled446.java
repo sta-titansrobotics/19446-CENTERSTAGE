@@ -54,7 +54,7 @@ public class DriveControlled446 extends LinearOpMode {
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        sliderMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -79,6 +79,9 @@ public class DriveControlled446 extends LinearOpMode {
 
         //Slider Positioning
         double sliderPos;
+        double sliderMax;
+        double sliderPower;
+        sliderMax = 10000;
 
         //Initial Positions
         linkageLeftPos = 0.0;
@@ -122,10 +125,8 @@ public class DriveControlled446 extends LinearOpMode {
             //Intake Motor Code
             if ((gamepad2.right_trigger > 0.0) && !intakeOn){
                 intakeMotor.setPower(1);
-                outtake.setPower(1);
             }else if((gamepad2.right_trigger == 0.0) && !intakeOn){
                 intakeMotor.setPower(0);
-                outtake.setPower(0);
             }
 
             if ((gamepad2.left_trigger > 0.0) && !intakeOn){
@@ -165,15 +166,28 @@ public class DriveControlled446 extends LinearOpMode {
             }
 
             //Slider Control
-            sliderPos = -gamepad2.right_stick_y;
+            sliderPower = -gamepad2.right_stick_y;
+            sliderPos = sliderMotor.getCurrentPosition();
 
-            sliderMotor.setPower(sliderPos);
+            sliderMotor.setPower(sliderPower);
+            
+            /*
+             * Slider Limiters
+            if(sliderPower > 0 && sliderPos > 0){
+                sliderMotor.setPower(sliderPower);
+            }else if(sliderPower < 0 && sliderPos < sliderMax){
+                sliderMotor.setPower(sliderPower);
+            }else{
+                sliderMotor.setPower(0);
+            }
+             */
+            
 
             //Flipper control
-            if((gamepad2.right_stick_y < 0) || (!isFlipperOpen && gamepad2.dpad_down)){
+            if(sliderPower >  0){
                 flipperPos = open;
                 isFlipperOpen = true;
-            }else if((gamepad2.right_stick_y > 0) || (isFlipperOpen && gamepad2.dpad_up)){
+            }else if(sliderPower < 0){
                 flipperPos = closed;
                 isFlipperOpen = false;
             }
@@ -189,15 +203,6 @@ public class DriveControlled446 extends LinearOpMode {
                 frontIntake1.setPosition(0);
                 frontIntake2.setPosition(0);
                 outtake.setPosition(0);
-            }
-            boolean isFlipperOpen = false;
-            if (gamepad2.y) {
-                if (!isFlipperOpen) {
-                    flipper.setPosition(1);
-                }
-                else {
-                    flipper.setPosition(0);
-                }
             }
             // endregion
             */
@@ -222,14 +227,13 @@ public class DriveControlled446 extends LinearOpMode {
             telemetry.addData("Lift Right Position:", liftRight.getCurrentPosition());
 
             //Intake Servo telemetry
-            //telemetry.addData("Intake Left Position: ", frontIntake1.getCurrentPosition());
-            //telemetry.addData("Intake Right Position: ", frontIntake2.getCurrentPosition());
+            telemetry.addData("Intake Left Position: ", frontIntake1.getPosition());
+            telemetry.addData("Intake Right Position: ", frontIntake2.getPosition());
 
             //Outtake telemetry
-            //telemetry.addData("Outtake Position: ", outtake.getCurrentPosition());
-            //telemetry.addData("Flipper position: ", flipper.getCurrentPosition());
+            telemetry.addData("Outtake Power: ", outtake.getPower());
+            telemetry.addData("Flipper position: ", flipper.getPosition());
             telemetry.update();
-            //endregion
         }
     }
 }
