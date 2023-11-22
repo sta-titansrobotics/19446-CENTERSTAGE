@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -29,7 +30,6 @@ public class DriveControlled446 extends LinearOpMode {
     private Servo flipper;
     private CRServo outtake;
 
-    // endregion
     @Override
     public void runOpMode() {
 
@@ -72,8 +72,14 @@ public class DriveControlled446 extends LinearOpMode {
         double linkageLeftPos;
         double linkageRightPos;
 
+        double linkageLeftMax = 0;
+        double linkageLeftMin = 0;
+        double linkageRightMax = 1;
+        double linkageRightMin = 1;
+
         //Flipper Variables
         boolean isFlipperOpen = false;
+        double flipperPos;
         double open = 2.1;
         double closed = 0.0;
 
@@ -97,7 +103,6 @@ public class DriveControlled446 extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            // region Mecanum Drive
             // Gamepad inputs
             double y = -gamepad1.left_stick_y; // Reverse the y-axis (if needed)
             double x = gamepad1.left_stick_x;
@@ -120,7 +125,6 @@ public class DriveControlled446 extends LinearOpMode {
             motorFR.setPower(frontRightPower);
             motorBL.setPower(backLeftPower);
             motorBR.setPower(backRightPower);
-            // endregion
 
             //Intake Motor Code
             if ((gamepad2.right_trigger > 0.0) && !intakeOn){
@@ -144,25 +148,45 @@ public class DriveControlled446 extends LinearOpMode {
                 outtake.setPower(0);
                 intakeOn = false;
             }
+            
+            linkageLeftPos += 0.05 * gamepad2.left_stick_y;
+            linkageRightPos += 0.05 * gamepad2.left_stick_y;
+            
+            //Set Max and Min for the linkage positions
+            if (linkageLeftPos > linkageLeftMax) {
+                linkageLeftPos = linkageLeftMax;
+            }
+            if (linkageLeftPos < linkageLeftMin) {
+                linkageLeftPos = linkageLeftMin;
+            }
+            if (linkageRightPos > linkageRightMax) {
+                linkageRightPos = linkageRightMax;
+            }
+            if (linkageRightPos < linkageRightMin) {
+                linkageRightPos = linkageRightMin;
+            }
+            
+            frontIntake1.setPosition(linkageLeftPos);
+            frontIntake2.setPosition(linkageRightPos);
 
             //Encoder Values for the lift
             if(gamepad1.dpad_up){
                 liftLeft.setTargetPosition(35000);
-                rightLift.setTargetPosition(35000);
+                liftRight.setTargetPosition(35000);
                 liftLeft.setPower(1);
                 liftRight.setPower(1);
             }else if(gamepad1.dpad_down){
                 liftLeft.setTargetPosition(0);
-                rightLift.setTargetPosition(0);
+                liftRight.setTargetPosition(0);
                 liftLeft.setPower(1);
                 liftRight.setPower(1);
             }
 
             //Pixel Release
             if(gamepad2.right_bumper){
-                outtake.setpower(-1);
+                outtake.setPower(-1);
             }else if(gamepad2.left_bumper){
-                outtake.setpower(-1);
+                outtake.setPower(-1);
             }
 
             //Slider Control
@@ -170,7 +194,7 @@ public class DriveControlled446 extends LinearOpMode {
             sliderPos = sliderMotor.getCurrentPosition();
 
             sliderMotor.setPower(sliderPower);
-            
+
             /*
              * Slider Limiters
             if(sliderPower > 0 && sliderPos > 0){
@@ -181,7 +205,7 @@ public class DriveControlled446 extends LinearOpMode {
                 sliderMotor.setPower(0);
             }
              */
-            
+
 
             //Flipper control
             if(sliderPower >  0){
@@ -191,21 +215,6 @@ public class DriveControlled446 extends LinearOpMode {
                 flipperPos = closed;
                 isFlipperOpen = false;
             }
-
-            /*
-            // region intake
-            // This is just a test. Will change in the future
-            if (gamepad2.b) {
-                frontIntake1.setPosition(1);
-                frontIntake2.setPosition(1);
-            }
-            if (gamepad2.x) {
-                frontIntake1.setPosition(0);
-                frontIntake2.setPosition(0);
-                outtake.setPosition(0);
-            }
-            // endregion
-            */
 
             // Drivetrain Telemetry
             telemetry.addData("LF Power:", motorFL.getPower());
@@ -237,4 +246,3 @@ public class DriveControlled446 extends LinearOpMode {
         }
     }
 }
-
