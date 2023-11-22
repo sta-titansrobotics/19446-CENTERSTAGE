@@ -26,8 +26,8 @@ public class DriveControlled446 extends LinearOpMode {
     //Servo Definitions
     private Servo frontIntake1;
     private Servo frontIntake2;
-    private Servo outtake;
     private Servo flipper;
+    private CRServo outtake;
 
     // endregion
     @Override
@@ -54,7 +54,7 @@ public class DriveControlled446 extends LinearOpMode {
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        sliderMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
@@ -62,16 +62,23 @@ public class DriveControlled446 extends LinearOpMode {
         liftLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        // region Servos
+        //Servo Mapping
         frontIntake1 = hardwareMap.get(Servo.class, "frontIntake1");
         frontIntake2 = hardwareMap.get(Servo.class, "frontIntake2");
-        outtake = hardwareMap.get(Servo.class, "outtake");
         flipper = hardwareMap.get(Servo.class, "flipper");
-        // endregion
+        outtake = hardwareMap.get(CRServo.class, "outtake");
 
         //Intake Linkage Servo
         double linkageLeftPos;
         double linkageRightPos;
+
+        //Flipper Variables
+        boolean isFlipperOpen = false;
+        double open = 2.1;
+        double closed = 0.0;
+
+        //Slider Positioning
+        double sliderPos;
 
         //Initial Positions
         linkageLeftPos = 0.0;
@@ -115,8 +122,10 @@ public class DriveControlled446 extends LinearOpMode {
             //Intake Motor Code
             if ((gamepad2.right_trigger > 0.0) && !intakeOn){
                 intakeMotor.setPower(1);
+                outtake.setPower(1);
             }else if((gamepad2.right_trigger == 0.0) && !intakeOn){
                 intakeMotor.setPower(0);
+                outtake.setPower(0);
             }
 
             if ((gamepad2.left_trigger > 0.0) && !intakeOn){
@@ -127,32 +136,51 @@ public class DriveControlled446 extends LinearOpMode {
 
             if(gamepad2.a && !intakeOn){
                 intakeMotor.setPower(1);
+                outtake.setPower(1);
                 intakeOn = true;
             }else if(gamepad2.a && intakeOn){
                 intakeMotor.setPower(0);
+                outtake.setPower(0);
                 intakeOn = false;
             }
 
             //Encoder Values for the lift
-            if(gamepad2.dpad_up){
+            if(gamepad1.dpad_up){
                 liftLeft.setTargetPosition(35000);
                 rightLift.setTargetPosition(35000);
                 liftLeft.setPower(1);
                 liftRight.setPower(1);
-            }else if(gamepad2.dpad_down){
+            }else if(gamepad1.dpad_down){
                 liftLeft.setTargetPosition(0);
                 rightLift.setTargetPosition(0);
                 liftLeft.setPower(1);
                 liftRight.setPower(1);
             }
 
+            //Pixel Release
+            if(gamepad2.right_bumper){
+                outtake.setpower(-1);
+            }else if(gamepad2.left_bumper){
+                outtake.setpower(-1);
+            }
+
+            //Slider Control
+            sliderPos = -gamepad2.right_stick_y;
+
+            sliderMotor.setPower(sliderPos);
+
+            //Flipper control
+            if((gamepad2.right_stick_y < 0) || (!isFlipperOpen && gamepad2.dpad_down)){
+                flipperPos = open;
+                isFlipperOpen = true;
+            }else if((gamepad2.right_stick_y > 0) || (isFlipperOpen && gamepad2.dpad_up)){
+                flipperPos = closed;
+                isFlipperOpen = false;
+            }
+
             /*
             // region intake
             // This is just a test. Will change in the future
-            if (gamepad1.a) {
-                intakeMotor.setPower(1);
-                outtake.setPosition(1);
-            }
             if (gamepad2.b) {
                 frontIntake1.setPosition(1);
                 frontIntake2.setPosition(1);
