@@ -12,19 +12,19 @@ import com.qualcomm.robotcore.util.Range;
 @TeleOp
 public class DriveControlled446 extends LinearOpMode {
 
-    //Primary Motor Defintions
+    // Primary Motor Defintions
     private DcMotor motorFL;
     private DcMotor motorFR;
     private DcMotor motorBL;
     private DcMotor motorBR;
 
-    //Secondary Motor Definitions
+    // Secondary Motor Definitions
     private DcMotor intakeMotor;
     private DcMotor sliderMotor;
     private DcMotor liftLeft;
     private DcMotor liftRight;
 
-    //Servo Definitions
+    // Servo Definitions
     private Servo frontIntake1;
     private Servo frontIntake2;
     private Servo flipper;
@@ -33,23 +33,23 @@ public class DriveControlled446 extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        //Drivetrain DC motors
+        // Drivetrain DC motors
         motorFL = hardwareMap.get(DcMotor.class, "motorFrontLeft");
         motorBL = hardwareMap.get(DcMotor.class, "motorBackLeft");
         motorFR = hardwareMap.get(DcMotor.class, "motorFrontRight");
         motorBR = hardwareMap.get(DcMotor.class, "motorBackRight");
 
-        //Secondary system DC motors
+        // Secondary system DC motors
         intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
         sliderMotor = hardwareMap.get(DcMotor.class, "sliderMotor");
         liftLeft = hardwareMap.get(DcMotor.class, "liftLeft");
         liftRight = hardwareMap.get(DcMotor.class, "liftRight");
 
-        //Reverse left side motors
+        // Reverse left side motors
         motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
         motorBL.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        //Encoder Setup
+        // Encoder Setup
         sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -62,38 +62,38 @@ public class DriveControlled446 extends LinearOpMode {
         liftLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         liftRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //Servo Mapping
+        // Servo Mapping
         frontIntake1 = hardwareMap.get(Servo.class, "frontIntake1");
         frontIntake2 = hardwareMap.get(Servo.class, "frontIntake2");
         flipper = hardwareMap.get(Servo.class, "flipper");
         outtake = hardwareMap.get(CRServo.class, "outtake");
 
-        //Intake Linkage Servo
+        // Intake Linkage Servo
         double linkageLeftPos;
         double linkageRightPos;
 
-        double linkageLeftMax = 0;
+        double linkageLeftMax = 1;
         double linkageLeftMin = 0;
         double linkageRightMax = 1;
-        double linkageRightMin = 1;
+        double linkageRightMin = 0;
 
-        //Flipper Variables
+        // Flipper Variables
         boolean isFlipperOpen = false;
         double flipperPos;
         double open = 2.1;
         double closed = 0.0;
 
-        //Slider Positioning
+        // Slider Positioning
         double sliderPos;
         double sliderMax;
         double sliderPower;
         sliderMax = 10000;
 
-        //Initial Positions
+        // Initial Positions
         linkageLeftPos = 0.0;
         linkageRightPos = 0.0;
 
-        //Boolean variables
+        // Boolean variables
         boolean intakeOn = false;
 
         waitForStart();
@@ -126,7 +126,7 @@ public class DriveControlled446 extends LinearOpMode {
             motorBL.setPower(backLeftPower);
             motorBR.setPower(backRightPower);
 
-            //Intake Motor Code
+            // Intake Motor Code
             if ((gamepad2.right_trigger > 0.0) && !intakeOn){
                 intakeMotor.setPower(1);
             }else if((gamepad2.right_trigger == 0.0) && !intakeOn){
@@ -149,27 +149,17 @@ public class DriveControlled446 extends LinearOpMode {
                 intakeOn = false;
             }
             
+            // Sets max and min values for the linkage positions
+            linkageLeftPos = Range.clip(linkageLeftPos, linkageLeftMin, linkageLeftMax);
+            linkageRightPos = Range.clip(linkageRightPos, linkageRightMin, linkageRightMax);
+            
+            // Controls linkage position
             linkageLeftPos += 0.05 * gamepad2.left_stick_y;
             linkageRightPos += 0.05 * gamepad2.left_stick_y;
-            
-            //Set Max and Min for the linkage positions
-            if (linkageLeftPos > linkageLeftMax) {
-                linkageLeftPos = linkageLeftMax;
-            }
-            if (linkageLeftPos < linkageLeftMin) {
-                linkageLeftPos = linkageLeftMin;
-            }
-            if (linkageRightPos > linkageRightMax) {
-                linkageRightPos = linkageRightMax;
-            }
-            if (linkageRightPos < linkageRightMin) {
-                linkageRightPos = linkageRightMin;
-            }
-            
             frontIntake1.setPosition(linkageLeftPos);
             frontIntake2.setPosition(linkageRightPos);
 
-            //Encoder Values for the lift
+            // Encoder Values for the lift
             if(gamepad1.dpad_up){
                 liftLeft.setTargetPosition(35000);
                 liftRight.setTargetPosition(35000);
@@ -182,14 +172,14 @@ public class DriveControlled446 extends LinearOpMode {
                 liftRight.setPower(1);
             }
 
-            //Pixel Release
+            // Pixel Release
             if(gamepad2.right_bumper){
                 outtake.setPower(-1);
             }else if(gamepad2.left_bumper){
                 outtake.setPower(-1);
             }
 
-            //Slider Control
+            // Slider Control
             sliderPower = -gamepad2.right_stick_y;
             sliderPos = sliderMotor.getCurrentPosition();
 
@@ -207,7 +197,7 @@ public class DriveControlled446 extends LinearOpMode {
              */
 
 
-            //Flipper control
+            // Flipper control
             if(sliderPower >  0){
                 flipperPos = open;
                 isFlipperOpen = true;
@@ -222,24 +212,24 @@ public class DriveControlled446 extends LinearOpMode {
             telemetry.addData("RF Power:", motorFR.getPower());
             telemetry.addData("RB Power:", motorBR.getPower());
 
-            //Intake Motor telemetry
+            // Intake Motor telemetry
             telemetry.addData("Intake Motor Power: ", intakeMotor.getPower());
 
-            //Slider telemetry
+            // Slider telemetry
             telemetry.addData("Slider Power: ", sliderMotor.getPower());
             telemetry.addData("Slider Position: ", sliderMotor.getCurrentPosition());
 
-            //Lift telemetry
+            // Lift telemetry
             telemetry.addData("Lift Left Power:", liftLeft.getPower());
             telemetry.addData("Lift Right Power:", liftRight.getPower());
             telemetry.addData("Lift Left Position:", liftLeft.getCurrentPosition());
             telemetry.addData("Lift Right Position:", liftRight.getCurrentPosition());
 
-            //Intake Servo telemetry
+            // Intake Servo telemetry
             telemetry.addData("Intake Left Position: ", frontIntake1.getPosition());
             telemetry.addData("Intake Right Position: ", frontIntake2.getPosition());
 
-            //Outtake telemetry
+            // Outtake telemetry
             telemetry.addData("Outtake Power: ", outtake.getPower());
             telemetry.addData("Flipper position: ", flipper.getPosition());
             telemetry.update();
