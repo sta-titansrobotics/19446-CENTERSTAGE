@@ -72,10 +72,10 @@ public class DriveControlled446 extends LinearOpMode {
         double linkageLeftPos;
         double linkageRightPos;
 
-        double linkageLeftMax = 0;
+        double linkageLeftMax = 1;
         double linkageLeftMin = 0;
         double linkageRightMax = 1;
-        double linkageRightMin = 1;
+        double linkageRightMin = 0;
 
         //Flipper Variables
         boolean isFlipperOpen = false;
@@ -152,20 +152,10 @@ public class DriveControlled446 extends LinearOpMode {
             linkageLeftPos += 0.05 * gamepad2.left_stick_y;
             linkageRightPos += 0.05 * gamepad2.left_stick_y;
             
-            //Set Max and Min for the linkage positions
-            if (linkageLeftPos > linkageLeftMax) {
-                linkageLeftPos = linkageLeftMax;
-            }
-            if (linkageLeftPos < linkageLeftMin) {
-                linkageLeftPos = linkageLeftMin;
-            }
-            if (linkageRightPos > linkageRightMax) {
-                linkageRightPos = linkageRightMax;
-            }
-            if (linkageRightPos < linkageRightMin) {
-                linkageRightPos = linkageRightMin;
-            }
-            
+            // Sets max and min values for the linkage positions
+            linkageLeftPos = Range.clip(linkageLeftPos, linkageLeftMin, linkageLeftMax);
+            linkageRightPos = Range.clip(linkageRightPos, linkageRightMin, linkageRightMax);
+
             frontIntake1.setPosition(linkageLeftPos);
             frontIntake2.setPosition(linkageRightPos);
 
