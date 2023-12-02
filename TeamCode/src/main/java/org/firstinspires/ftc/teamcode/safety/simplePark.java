@@ -1,77 +1,20 @@
-// *WHATEVER YOU DO, DO NOT EDIT ANYTHING HERE* //
-
 package org.firstinspires.ftc.teamcode.auto.safety;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Servo;
 
-@Autonomous
-public class encoderTestingFinalRedRight extends LinearOpMode {
-
-    //Set motor variables
-    public DcMotor motorFL;
-    public DcMotor motorBL;
-    public DcMotor motorFR;
-    public DcMotor motorBR;
-
-    //Initializing encoder positions
-    public int leftPos1;
-    public int leftPos2;
-    public int rightPos1;
-    public int rightPos2;
-
-    //Motors
-    //public DcMotor intakeMotor;
-    public DcMotor sliderMotor;
-    //public DcMotor liftLeft;
-    //public DcMotor liftRight;
-
-    //Servo Definitions
-    //public Servo frontIntake1;
-    //public Servo frontIntake2;
-    //public Servo flipper;
-    public CRServo outtake;
-
+public class simplePark extends LinearOpMode {
+    public DcMotor motorFL, motorBL, motorFR, motorBR;
+    public int leftPos1, leftPos2, rightPos1, rightPos2;
+    @Override
     public void runOpMode() {
-
         //Initialize motors
         motorFL = hardwareMap.get(DcMotor.class, "motorFrontLeft");
         motorBL = hardwareMap.get(DcMotor.class, "motorBackLeft");
         motorFR = hardwareMap.get(DcMotor.class, "motorFrontRight");
         motorBR = hardwareMap.get(DcMotor.class, "motorBackRight");
 
-        //intakeMotor = hardwareMap.get(DcMotor.class, "intakeMotor");
-        sliderMotor = hardwareMap.get(DcMotor.class, "sliderMotor");
-        //liftLeft = hardwareMap.get(DcMotor.class, "liftLeft");
-        //liftRight = hardwareMap.get(DcMotor.class, "liftRight");
-
-        //Servo Mapping
-        /*
-        frontIntake1 = hardwareMap.get(Servo.class, "frontIntake1");
-        frontIntake2 = hardwareMap.get(Servo.class, "frontIntake2");
-        flipper = hardwareMap.get(Servo.class, "flipper");
-        *
-         */
-        outtake = hardwareMap.get(CRServo.class, "outtake");
-
-        //set mode to stop and reset encoders -- resets encoders to the 0 position
-        motorFL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBL.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorFR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        motorBR.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        sliderMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        //Reverse left side motors
-        motorFL.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBL.setDirection(DcMotorSimple.Direction.REVERSE);
-        motorBR.setDirection(DcMotorSimple.Direction.REVERSE); //exception?
-
-        //Initialize the positions to zero, since the motor has not moved yet
+        //Initialize zero positions
         leftPos1 = 0;
         leftPos2 = 0;
         rightPos1 = 0;
@@ -82,30 +25,10 @@ public class encoderTestingFinalRedRight extends LinearOpMode {
         motorFR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorBR.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        sliderMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        //any code after this command will not be executed until the match has started
         waitForStart();
 
-        //can now set drive distance because of the function below; now we just need to input the distance
-        //can also control the direction using the mecanum drivetrain directions here: https://gm0.org/en/latest/docs/software/tutorials/mecanum-drive.html
+        drive(60, 60, 60, 60, 0.3);
 
-        //Start backwards
-        drive(51, -51, -54, 54, 0.1); //Strafe right
-        sleep(1500);
-        drive(-70, -70, -70, -70, 0.1); //Drive back
-        sleep(1500);
-        //Drop in backdrop:
-        raiseSlider();
-        dropPixels();
-        drive(20, 20, 20, 20, 0.1);
-        sleep(1000);
-        drive(-60, 60, 60, -60, 0.1); //Strafe left towards park
-        sleep(1000);
-        drive(-50, -50, -50, -50, 0.1);
-        sleep(1000);
-
-        //1425.1 ticks/rev
         motorFL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorBL.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motorFR.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -118,6 +41,7 @@ public class encoderTestingFinalRedRight extends LinearOpMode {
             telemetry.addData("motorBR Encoder Position: ",motorBR.getCurrentPosition());
             telemetry.update();
         }
+
     }
 
     //will use a function that will take the distance and speed of the motors based on the rotation
@@ -206,23 +130,5 @@ public class encoderTestingFinalRedRight extends LinearOpMode {
         motorFR.setPower(0);
         motorBR.setPower(0);
 
-    }
-
-    private void dropPixels() {
-        outtake.setPower(1);
-        sleep(5000);
-        outtake.setPower(0);
-    }
-
-    private void raiseSlider() {
-        sliderMotor.setTargetPosition(9000);
-        sliderMotor.setPower(0.7);
-        sliderMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //Stall the next command:
-        while (sliderMotor.isBusy()) {
-
-        }
-        //Stop driving
-        sliderMotor.setPower(0);
     }
 }
